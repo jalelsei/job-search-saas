@@ -4,6 +4,7 @@ import { prisma } from "./lib/prisma"
 import bcrypt from "bcryptjs"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true, // Required for Netlify (and other serverless hosts)
   providers: [
     Credentials({
       name: "Credentials",
