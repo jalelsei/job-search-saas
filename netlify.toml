@@ -1,0 +1,3 @@
+# Disable Edge for Next.js middleware so it runs in Node (avoids Node crypto in Edge error)
+[build.environment]
+  NEXT_DISABLE_NETLIFY_EDGE = "true"
