@@ -1,26 +1,38 @@
-import { auth } from "./auth"
 import { NextResponse } from "next/server"
 
-export default auth((req) => {
-  const { pathname } = req.nextUrl
-  const isLoggedIn = !!req.auth
+// Edge-compatible: no Node deps (no auth(), no crypto).
+// We only check for the NextAuth session cookie; real auth is validated in API/pages.
+const SESSION_COOKIE_NAMES = [
+  "authjs.session-token",
+  "__Secure-authjs.session-token",
+  "next-auth.session-token",
+  "__Secure-next-auth.session-token",
+]
 
-  // Routes publiques
+function hasSessionCookie(request: Request): boolean {
+  const cookieHeader = request.headers.get("cookie") ?? ""
+  return SESSION_COOKIE_NAMES.some((name) =>
+    cookieHeader.includes(`${name}=`)
+  )
+}
+
+export default function middleware(request: Request) {
+  const { pathname } = new URL(request.url)
+  const isLoggedIn = hasSessionCookie(request)
+
   const publicRoutes = ["/login", "/register"]
-  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
+  const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route))
 
-  // Si l'utilisateur n'est pas connecté et essaie d'accéder à une route protégée
   if (!isLoggedIn && !isPublicRoute) {
-    return NextResponse.redirect(new URL("/login", req.url))
+    return NextResponse.redirect(new URL("/login", request.url))
   }
 
-  // Si l'utilisateur est connecté et essaie d'accéder aux pages de connexion
   if (isLoggedIn && isPublicRoute) {
-    return NextResponse.redirect(new URL("/dashboard", req.url))
+    return NextResponse.redirect(new URL("/dashboard", request.url))
   }
 
   return NextResponse.next()
-})
+}
 
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
