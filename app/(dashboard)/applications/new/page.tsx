@@ -1,0 +1,207 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+
+export default function NewApplicationPage() {
+  const router = useRouter()
+  const [companies, setCompanies] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const [formData, setFormData] = useState({
+    position: "",
+    status: "TO_APPLY",
+    companyId: "",
+    appliedAt: "",
+    interviewAt: "",
+    deadline: "",
+    notes: "",
+  })
+
+  useEffect(() => {
+    fetchCompanies()
+  }, [])
+
+  const fetchCompanies = async () => {
+    try {
+      const response = await fetch("/api/companies")
+      if (response.ok) {
+        const data = await response.json()
+        setCompanies(data)
+      }
+    } catch (error) {
+      console.error("Erreur lors du chargement des entreprises:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSubmitting(true)
+
+    try {
+      const response = await fetch("/api/applications", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (response.ok) {
+        router.push("/applications")
+      } else {
+        const error = await response.json()
+        alert(error.error || "Erreur lors de la création")
+      }
+    } catch (error) {
+      alert("Une erreur est survenue")
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  if (loading) {
+    return <div className="p-6">Chargement...</div>
+  }
+
+  return (
+    <div className="px-4 py-6 sm:px-0 max-w-2xl mx-auto">
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">
+        Nouvelle candidature
+      </h1>
+
+      <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 space-y-6">
+        <div>
+          <label htmlFor="position" className="block text-sm font-medium text-gray-700">
+            Poste *
+          </label>
+          <input
+            type="text"
+            id="position"
+            required
+            value={formData.position}
+            onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="companyId" className="block text-sm font-medium text-gray-700">
+            Entreprise *
+          </label>
+          <select
+            id="companyId"
+            required
+            value={formData.companyId}
+            onChange={(e) => setFormData({ ...formData, companyId: e.target.value })}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          >
+            <option value="">Sélectionner une entreprise</option>
+            {companies.map((company) => (
+              <option key={company.id} value={company.id}>
+                {company.name}
+              </option>
+            ))}
+          </select>
+          <a
+            href="/companies/new"
+            className="text-sm text-blue-600 hover:text-blue-500 mt-1 inline-block"
+          >
+            Créer une nouvelle entreprise
+          </a>
+        </div>
+
+        <div>
+          <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+            Statut
+          </label>
+          <select
+            id="status"
+            value={formData.status}
+            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          >
+            <option value="TO_APPLY">À postuler</option>
+            <option value="APPLIED">Candidature envoyée</option>
+            <option value="INTERVIEW">Entretien</option>
+            <option value="REJECTED">Refus</option>
+            <option value="ACCEPTED">Accepté</option>
+          </select>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label htmlFor="deadline" className="block text-sm font-medium text-gray-700">
+              Deadline
+            </label>
+            <input
+              type="date"
+              id="deadline"
+              value={formData.deadline}
+              onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="appliedAt" className="block text-sm font-medium text-gray-700">
+              Date d'envoi
+            </label>
+            <input
+              type="date"
+              id="appliedAt"
+              value={formData.appliedAt}
+              onChange={(e) => setFormData({ ...formData, appliedAt: e.target.value })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="interviewAt" className="block text-sm font-medium text-gray-700">
+              Date d'entretien
+            </label>
+            <input
+              type="datetime-local"
+              id="interviewAt"
+              value={formData.interviewAt}
+              onChange={(e) => setFormData({ ...formData, interviewAt: e.target.value })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
+            Notes
+          </label>
+          <textarea
+            id="notes"
+            rows={4}
+            value={formData.notes}
+            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+
+        <div className="flex justify-end space-x-4">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+          >
+            Annuler
+          </button>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+          >
+            {submitting ? "Création..." : "Créer"}
+          </button>
+        </div>
+      </form>
+    </div>
+  )
+}

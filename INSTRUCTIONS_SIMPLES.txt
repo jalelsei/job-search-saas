@@ -1,0 +1,49 @@
+═══════════════════════════════════════════════════════════════
+  GUIDE ULTRA-SIMPLE - Configuration en 3 étapes
+═══════════════════════════════════════════════════════════════
+
+ÉTAPE 1 : Créer votre base de données Supabase (5 minutes)
+────────────────────────────────────────────────────────────
+
+1. Allez sur : https://supabase.com
+2. Cliquez sur "Start your project" (en haut à droite)
+3. Connectez-vous (GitHub est le plus rapide)
+4. Cliquez sur "New Project"
+5. Remplissez :
+   - Name : job-search
+   - Database Password : créez un mot de passe (NOTEZ-LE !)
+   - Region : choisissez la plus proche
+6. Cliquez "Create new project" et attendez 2-3 minutes
+
+7. Récupérez la connection string :
+   - Cliquez sur ⚙️ Settings (en bas à gauche)
+   - Cliquez sur "Database"
+   - Descendez jusqu'à "Connection string"
+   - Cliquez sur l'onglet "URI"
+   - Vous verrez une ligne qui commence par postgresql://
+   - ⚠️ REMPLACEZ [YOUR-PASSWORD] par votre mot de passe
+   - COPIEZ toute la ligne
+
+ÉTAPE 2 : Mettre à jour le fichier .env
+────────────────────────────────────────────────────────────
+
+1. Ouvrez le fichier .env dans le dossier du projet
+2. Remplacez la ligne DATABASE_URL par celle que vous avez copiée
+   (celle qui commence par postgresql://)
+
+ÉTAPE 3 : Créer les tables et lancer l'application
+────────────────────────────────────────────────────────────
+
+Dans le terminal, exécutez ces commandes :
+
+  npx prisma generate
+  npx prisma migrate dev --name init
+  npm run dev
+
+Puis ouvrez : http://localhost:3000
+
+═══════════════════════════════════════════════════════════════
+
+Fichiers d'aide disponibles :
+- COMMENCER_ICI.md : Guide détaillé
+- GUIDE_DEMARRAGE.md : Guide complet avec résolution de problèmes
