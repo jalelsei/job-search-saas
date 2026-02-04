@@ -20,7 +20,7 @@ export default async function DashboardPage() {
 
   let totalApplications: number
   let applicationsByStatus: { status: string; _count: number }[]
-  let recentApplications: { id: string; position: string; status: string; company: { name: string }; appliedAt: Date | null; createdAt: Date; [key: string]: unknown }[]
+  let recentApplications: { id: string; position: string; status: string; company: { name: string }; appliedAt: Date | null; createdAt: Date; platform?: string | null; productType?: string | null; salary?: string | null; announcementLink?: string | null }[]
   let totalCompanies: number
 
   try {
