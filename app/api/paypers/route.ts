@@ -2,6 +2,9 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
 
+/** Une année de finances */
+type FinancesAnnee = { annee?: number; chiffre_affaires?: number; resultat?: number; [key: string]: unknown }
+
 /** Données enrichies (Pappers ou autre source) */
 type EnrichedData = {
   source: "pappers"
@@ -18,6 +21,8 @@ type EnrichedData = {
   formeJuridique?: string
   dateCreation?: string
   capital?: string
+  /** Dernières années (pour graphique) */
+  financesAnnuelles?: { annee: number; chiffreAffaires: number; resultat?: number }[]
   [key: string]: unknown
 } | {
   source: "none"
@@ -77,16 +82,27 @@ export async function GET(request: Request) {
           { next: { revalidate: 0 } }
         )
         if (!searchRes.ok) {
-          apiData = { source: "none", message: "Recherche Pappers indisponible." }
+          const status = searchRes.status
+          apiData = {
+            source: "none",
+            message: status === 401
+              ? "Token Pappers invalide ou expiré. Vérifiez PAPPERS_API_TOKEN sur pappers.fr."
+              : `Recherche Pappers indisponible (${status}). Vérifiez le token ou le quota.`,
+          }
         } else {
-          const searchJson = await searchRes.json() as { resultats?: { siren?: string }[] }
-          const siren = searchJson?.resultats?.[0]?.siren
-          if (siren) {
+          const searchJson = await searchRes.json() as { resultats?: { siren?: string }[]; entreprises?: { siren?: string }[] }
+          const resultats = searchJson?.resultats ?? searchJson?.entreprises
+          const siren = resultats?.[0]?.siren
+          if (!siren) {
+            apiData = { source: "none", message: `Aucune entreprise trouvée sur Pappers pour « ${company.name.trim()} ». Essayez un nom plus proche du registre.` }
+          } else {
             const entRes = await fetch(
               `https://api.pappers.fr/v2/entreprise?api_token=${encodeURIComponent(token)}&siren=${siren}`,
               { next: { revalidate: 0 } }
             )
-            if (entRes.ok) {
+            if (!entRes.ok) {
+              apiData = { source: "none", message: "Fiche entreprise Pappers indisponible (vérifiez le token ou le quota)." }
+            } else {
               const ent = await entRes.json() as Record<string, unknown>
               const siege = ent.siege as Record<string, unknown> | undefined
               const adresse = siege
@@ -100,10 +116,19 @@ export async function GET(request: Request) {
               const effectif = (ent.effectif as number | undefined) != null
                 ? String(ent.effectif)
                 : undefined
-              const finances = ent.finances as Record<string, unknown>[] | undefined
-              const derniersComptes = finances?.[0] as Record<string, unknown> | undefined
-              const ca = derniersComptes?.chiffre_affaires ?? derniersComptes?.chiffre_d_affaires
+              const finances = ent.finances as FinancesAnnee[] | undefined
+              const derniersComptes = finances?.[0]
+              const ca = derniersComptes?.chiffre_affaires ?? (derniersComptes as Record<string, unknown>)?.chiffre_d_affaires
               const resultat = derniersComptes?.resultat
+              const financesAnnuelles = finances
+                ?.filter((f) => (f.chiffre_affaires != null || (f as Record<string, unknown>).chiffre_d_affaires != null))
+                .slice(0, 5)
+                .map((f) => ({
+                  annee: f.annee ?? 0,
+                  chiffreAffaires: Number((f.chiffre_affaires ?? (f as Record<string, unknown>).chiffre_d_affaires) ?? 0),
+                  resultat: f.resultat != null ? Number(f.resultat) : undefined,
+                }))
+                .reverse()
               apiData = {
                 source: "pappers",
                 siren: ent.siren as string | undefined,
@@ -122,13 +147,14 @@ export async function GET(request: Request) {
                 formeJuridique: ent.forme_juridique as string | undefined,
                 dateCreation: ent.date_creation as string | undefined,
                 capital: ent.capital != null ? String(ent.capital) : undefined,
+                financesAnnuelles: financesAnnuelles?.length ? financesAnnuelles : undefined,
               }
             }
           }
         }
       } catch (err) {
         console.error("Erreur API Pappers:", err)
-        apiData = { source: "none", message: "Erreur lors de l'appel API entreprise." }
+        apiData = { source: "none", message: "Erreur réseau ou serveur Pappers. Réessayez ou vérifiez pappers.fr." }
       }
     }
 

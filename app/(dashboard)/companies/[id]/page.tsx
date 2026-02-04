@@ -4,6 +4,14 @@ import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
 
+function formatNombre(value: string | number): string {
+  const n = typeof value === "string" ? parseFloat(value.replace(/\s/g, "")) : value
+  if (Number.isNaN(n)) return String(value)
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(".", ",")} M€`
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1).replace(".", ",")} k€`
+  return `${n.toLocaleString("fr-FR")} €`
+}
+
 export default function CompanyDetailPage() {
   const router = useRouter()
   const params = useParams()
@@ -33,6 +41,7 @@ export default function CompanyDetailPage() {
       effectif?: string; effectifMin?: number; effectifMax?: number
       chiffreAffaires?: string; resultat?: string
       formeJuridique?: string; dateCreation?: string; capital?: string
+      financesAnnuelles?: { annee: number; chiffreAffaires: number; resultat?: number }[]
       message?: string
       [key: string]: unknown
     }
@@ -317,36 +326,98 @@ export default function CompanyDetailPage() {
                 {paypersLoading ? "Chargement..." : "Recherche API entreprise (Pappers)"}
               </button>
               {paypersData && (
-                <div className="mt-4 p-4 rounded-xl border border-gray-200 bg-gray-50 space-y-3 text-sm">
-                  <h3 className="font-semibold text-gray-900">Données entreprise</h3>
-                  <p><span className="text-gray-500">Nom :</span> {paypersData.company.name}</p>
-                  {paypersData.company.website && <p><span className="text-gray-500">Site :</span> {paypersData.company.website}</p>}
-                  {paypersData.company.industry && <p><span className="text-gray-500">Secteur :</span> {paypersData.company.industry}</p>}
-                  {paypersData.company.size && <p><span className="text-gray-500">Taille :</span> {paypersData.company.size}</p>}
+                <div className="mt-4 space-y-4">
+                  {/* Message si token manquant */}
+                  {paypersData.paypers?.source === "none" && paypersData.paypers?.message && (
+                    <div className="p-4 rounded-xl border border-amber-200 bg-amber-50 text-amber-800">
+                      <p className="font-medium">{paypersData.paypers.message}</p>
+                      <p className="mt-2 text-sm">Sur Netlify : ajoutez la variable <code className="bg-amber-100 px-1 rounded">PAPPERS_API_TOKEN</code> dans Site configuration → Environment variables, puis déclenchez un nouveau déploiement.</p>
+                    </div>
+                  )}
+
+                  {/* Données de base (toujours affichées) */}
+                  <div className="p-4 rounded-xl border border-gray-200 bg-gray-50 space-y-2 text-sm">
+                    <h3 className="font-semibold text-gray-900">Fiche entreprise</h3>
+                    <p><span className="text-gray-500">Nom :</span> {paypersData.company.name}</p>
+                    {paypersData.company.website && <p><span className="text-gray-500">Site :</span> <a href={paypersData.company.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{paypersData.company.website}</a></p>}
+                    {paypersData.company.industry && <p><span className="text-gray-500">Secteur :</span> {paypersData.company.industry}</p>}
+                    {paypersData.company.size && <p><span className="text-gray-500">Taille :</span> {paypersData.company.size}</p>}
+                  </div>
+
+                  {/* Bloc visuel : chiffres clés + identité + dirigeants quand Pappers OK */}
                   {paypersData.paypers?.source === "pappers" && (
                     <>
-                      {paypersData.paypers?.address && <p><span className="text-gray-500">Adresse :</span> {String(paypersData.paypers.address)}</p>}
-                      {paypersData.paypers?.siret && <p><span className="text-gray-500">SIRET :</span> {String(paypersData.paypers.siret)}</p>}
-                      {paypersData.paypers?.siren && <p><span className="text-gray-500">SIREN :</span> {String(paypersData.paypers.siren)}</p>}
-                      {paypersData.paypers?.formeJuridique && <p><span className="text-gray-500">Forme juridique :</span> {String(paypersData.paypers.formeJuridique)}</p>}
-                      {(paypersData.paypers?.effectif ?? paypersData.paypers?.effectifMin ?? paypersData.paypers?.effectifMax) != null && (
-                        <p><span className="text-gray-500">Effectif :</span>{" "}
-                          {paypersData.paypers.effectif ?? (paypersData.paypers.effectifMin != null && paypersData.paypers.effectifMax != null
-                            ? `${paypersData.paypers.effectifMin} - ${paypersData.paypers.effectifMax}`
-                            : paypersData.paypers.effectifMin ?? paypersData.paypers.effectifMax)}
-                        </p>
+                      {/* Chiffres clés en cartes */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        {paypersData.paypers.chiffreAffaires != null && (
+                          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                            <p className="text-xs font-medium text-emerald-700 uppercase tracking-wide">Chiffre d&apos;affaires</p>
+                            <p className="text-xl font-bold text-emerald-900 mt-1">{formatNombre(paypersData.paypers.chiffreAffaires)}</p>
+                          </div>
+                        )}
+                        {(paypersData.paypers.resultat != null && paypersData.paypers.resultat !== "") && (
+                          <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+                            <p className="text-xs font-medium text-blue-700 uppercase tracking-wide">Résultat</p>
+                            <p className="text-xl font-bold text-blue-900 mt-1">{formatNombre(paypersData.paypers.resultat)}</p>
+                          </div>
+                        )}
+                        {(paypersData.paypers.effectif ?? paypersData.paypers.effectifMin ?? paypersData.paypers.effectifMax) != null && (
+                          <div className="rounded-xl border border-violet-200 bg-violet-50 p-4">
+                            <p className="text-xs font-medium text-violet-700 uppercase tracking-wide">Effectif</p>
+                            <p className="text-xl font-bold text-violet-900 mt-1">
+                              {paypersData.paypers.effectif ?? (paypersData.paypers.effectifMin != null && paypersData.paypers.effectifMax != null
+                                ? `${paypersData.paypers.effectifMin} - ${paypersData.paypers.effectifMax}`
+                                : paypersData.paypers.effectifMin ?? paypersData.paypers.effectifMax)}
+                            </p>
+                          </div>
+                        )}
+                        {paypersData.paypers.capital != null && paypersData.paypers.capital !== "" && (
+                          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                            <p className="text-xs font-medium text-slate-700 uppercase tracking-wide">Capital</p>
+                            <p className="text-xl font-bold text-slate-900 mt-1">{formatNombre(paypersData.paypers.capital)}</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Graphique CA sur les dernières années */}
+                      {paypersData.paypers.financesAnnuelles && paypersData.paypers.financesAnnuelles.length > 0 && (
+                        <div className="rounded-xl border border-gray-200 bg-white p-4">
+                          <h3 className="font-semibold text-gray-900 mb-3">Chiffre d&apos;affaires (dernières années)</h3>
+                          <div className="flex items-end gap-2 h-32">
+                            {paypersData.paypers.financesAnnuelles.map((f: { annee: number; chiffreAffaires: number }) => {
+                              const max = Math.max(...paypersData.paypers!.financesAnnuelles!.map((x: { chiffreAffaires: number }) => x.chiffreAffaires), 1)
+                              const h = max ? (f.chiffreAffaires / max) * 100 : 0
+                              return (
+                                <div key={f.annee} className="flex-1 flex flex-col items-center gap-1">
+                                  <div className="w-full bg-emerald-200 rounded-t flex items-end justify-center" style={{ height: `${Math.max(h, 4)}%`, minHeight: "4px" }}>
+                                    <span className="text-xs font-medium text-emerald-800">{f.chiffreAffaires >= 1000 ? `${(f.chiffreAffaires / 1000).toFixed(0)}k` : f.chiffreAffaires}</span>
+                                  </div>
+                                  <span className="text-xs text-gray-500">{f.annee}</span>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
                       )}
-                      {paypersData.paypers?.chiffreAffaires && <p><span className="text-gray-500">Chiffre d'affaires :</span> {String(paypersData.paypers.chiffreAffaires)}</p>}
-                      {paypersData.paypers?.resultat != null && <p><span className="text-gray-500">Résultat :</span> {String(paypersData.paypers.resultat)}</p>}
-                      {paypersData.paypers?.dateCreation && <p><span className="text-gray-500">Création :</span> {String(paypersData.paypers.dateCreation)}</p>}
-                      {paypersData.paypers?.capital != null && <p><span className="text-gray-500">Capital :</span> {String(paypersData.paypers.capital)}</p>}
-                      {(paypersData.paypers?.manager ?? (paypersData.paypers?.managers && paypersData.paypers.managers.length > 0)) && (
-                        <div>
-                          <p className="text-gray-500 mb-1">Dirigeant(s)</p>
+
+                      {/* Identité légale */}
+                      <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 space-y-2 text-sm">
+                        <h3 className="font-semibold text-gray-900">Identité légale</h3>
+                        {paypersData.paypers.siret && <p><span className="text-gray-500">SIRET :</span> {String(paypersData.paypers.siret)}</p>}
+                        {paypersData.paypers.siren && <p><span className="text-gray-500">SIREN :</span> {String(paypersData.paypers.siren)}</p>}
+                        {paypersData.paypers.formeJuridique && <p><span className="text-gray-500">Forme juridique :</span> {String(paypersData.paypers.formeJuridique)}</p>}
+                        {paypersData.paypers.dateCreation && <p><span className="text-gray-500">Création :</span> {String(paypersData.paypers.dateCreation)}</p>}
+                        {paypersData.paypers.address && <p><span className="text-gray-500">Adresse :</span> {String(paypersData.paypers.address)}</p>}
+                      </div>
+
+                      {/* Dirigeants */}
+                      {(paypersData.paypers.manager ?? (paypersData.paypers.managers && paypersData.paypers.managers.length > 0)) && (
+                        <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                          <h3 className="font-semibold text-gray-900 mb-2">Dirigeant(s)</h3>
                           {paypersData.paypers.manager ? (
                             <p className="text-gray-900">{paypersData.paypers.manager}</p>
                           ) : (
-                            <ul className="list-disc list-inside text-gray-900">
+                            <ul className="list-disc list-inside text-gray-900 space-y-1">
                               {paypersData.paypers.managers!.map((m: { nom?: string; fonction?: string }, i: number) => (
                                 <li key={i}>{m.nom ?? ""} {m.fonction ? `— ${m.fonction}` : ""}</li>
                               ))}
@@ -354,20 +425,18 @@ export default function CompanyDetailPage() {
                           )}
                         </div>
                       )}
+
+                      {paypersData.contacts?.length > 0 && (
+                        <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                          <p className="text-gray-500 mb-1 font-medium">Vos contacts</p>
+                          <ul className="list-disc list-inside text-gray-900 text-sm">
+                            {paypersData.contacts.map((c: { name: string; position?: string; email?: string }, i: number) => (
+                              <li key={i}>{c.name} {c.position ? `(${c.position})` : ""} {c.email ? `— ${c.email}` : ""}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </>
-                  )}
-                  {paypersData.paypers?.source === "none" && paypersData.paypers?.message && (
-                    <p className="text-amber-700">{paypersData.paypers.message}</p>
-                  )}
-                  {paypersData.contacts?.length > 0 && (
-                    <div>
-                      <p className="text-gray-500 mb-1">Vos contacts</p>
-                      <ul className="list-disc list-inside text-gray-900">
-                        {paypersData.contacts.map((c: { name: string; position?: string; email?: string }, i: number) => (
-                          <li key={i}>{c.name} {c.position ? `(${c.position})` : ""} {c.email ? `— ${c.email}` : ""}</li>
-                        ))}
-                      </ul>
-                    </div>
                   )}
                 </div>
               )}
