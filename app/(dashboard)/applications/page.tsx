@@ -19,6 +19,11 @@ export default async function ApplicationsPage() {
     orderBy: { createdAt: "desc" },
   })
 
+  // Sérialiser pour éviter erreur Server Components en prod (Date non sérialisables)
+  const serialized = JSON.parse(
+    JSON.stringify(applications, (_, v) => (v instanceof Date ? v.toISOString() : v))
+  )
+
   return (
     <div className="px-4 py-6 sm:px-0">
       <div className="flex justify-between items-center mb-6">
@@ -31,7 +36,7 @@ export default async function ApplicationsPage() {
         </Link>
       </div>
 
-      {applications.length === 0 ? (
+      {serialized.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-500 mb-4">Aucune candidature pour le moment.</p>
           <Link
@@ -43,7 +48,7 @@ export default async function ApplicationsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {applications.map((application) => (
+          {serialized.map((application: (typeof applications)[0]) => (
             <ApplicationCard key={application.id} application={application} />
           ))}
         </div>
