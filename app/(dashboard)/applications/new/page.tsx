@@ -83,7 +83,7 @@ export default function NewApplicationPage() {
             required
             value={formData.position}
             onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           />
         </div>
 
@@ -96,7 +96,7 @@ export default function NewApplicationPage() {
             required
             value={formData.companyId}
             onChange={(e) => setFormData({ ...formData, companyId: e.target.value })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           >
             <option value="">Sélectionner une entreprise</option>
             {companies.map((company) => (
@@ -121,7 +121,7 @@ export default function NewApplicationPage() {
             id="status"
             value={formData.status}
             onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           >
             <option value="TO_APPLY">À postuler</option>
             <option value="APPLIED">Candidature envoyée</option>
@@ -141,7 +141,7 @@ export default function NewApplicationPage() {
               id="deadline"
               value={formData.deadline}
               onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
 
@@ -154,7 +154,7 @@ export default function NewApplicationPage() {
               id="appliedAt"
               value={formData.appliedAt}
               onChange={(e) => setFormData({ ...formData, appliedAt: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
 
@@ -167,7 +167,7 @@ export default function NewApplicationPage() {
               id="interviewAt"
               value={formData.interviewAt}
               onChange={(e) => setFormData({ ...formData, interviewAt: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
         </div>
@@ -181,7 +181,7 @@ export default function NewApplicationPage() {
             rows={4}
             value={formData.notes}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           />
         </div>
 

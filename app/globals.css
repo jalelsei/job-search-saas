@@ -24,3 +24,29 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Texte en noir sur fond blanc pour tous les champs */
+input,
+select,
+textarea {
+  color: #0a0a0a !important;
+  background-color: #fff !important;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #1f2937 !important;
+}
+select option {
+  color: #0a0a0a !important;
+  background: #fff;
+}
+
+/* Labels et texte des formulaires en noir sur fond blanc */
+.bg-white label,
+form.bg-white label {
+  color: #0a0a0a !important;
+}
+/* Bouton Annuler et boutons secondaires des formulaires */
+form.bg-white button[type="button"] {
+  color: #0a0a0a !important;
+}

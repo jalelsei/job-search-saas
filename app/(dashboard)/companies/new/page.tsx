@@ -45,9 +45,9 @@ export default function NewCompanyPage() {
         Nouvelle entreprise
       </h1>
 
-      <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 space-y-6 text-[#0a0a0a]">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="name" className="block text-sm font-medium text-[#0a0a0a]">
             Nom de l'entreprise *
           </label>
           <input
@@ -56,12 +56,12 @@ export default function NewCompanyPage() {
             required
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-[#0a0a0a] placeholder:text-[#1f2937] shadow-sm focus:border-blue-500 focus:ring-blue-500"
           />
         </div>
 
         <div>
-          <label htmlFor="website" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="website" className="block text-sm font-medium text-[#0a0a0a]">
             Site web
           </label>
           <input
@@ -69,13 +69,13 @@ export default function NewCompanyPage() {
             id="website"
             value={formData.website}
             onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-[#0a0a0a] placeholder:text-[#1f2937] shadow-sm focus:border-blue-500 focus:ring-blue-500"
             placeholder="https://example.com"
           />
         </div>
 
         <div>
-          <label htmlFor="industry" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="industry" className="block text-sm font-medium text-[#0a0a0a]">
             Secteur d'activité
           </label>
           <input
@@ -83,22 +83,22 @@ export default function NewCompanyPage() {
             id="industry"
             value={formData.industry}
             onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-[#0a0a0a] placeholder:text-[#1f2937] shadow-sm focus:border-blue-500 focus:ring-blue-500"
             placeholder="Ex: Technologie, Finance, etc."
           />
         </div>
 
         <div>
-          <label htmlFor="size" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="size" className="block text-sm font-medium text-[#0a0a0a]">
             Taille
           </label>
           <select
             id="size"
             value={formData.size}
             onChange={(e) => setFormData({ ...formData, size: e.target.value })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-[#0a0a0a] shadow-sm focus:border-blue-500 focus:ring-blue-500"
           >
-            <option value="">Sélectionner</option>
+            <option value="" className="text-[#0a0a0a]">Sélectionner</option>
             <option value="1-10">1-10 employés</option>
             <option value="11-50">11-50 employés</option>
             <option value="51-200">51-200 employés</option>
@@ -112,7 +112,7 @@ export default function NewCompanyPage() {
           <button
             type="button"
             onClick={() => router.back()}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            className="px-4 py-2 border border-gray-300 rounded-md text-[#0a0a0a] hover:bg-gray-50"
           >
             Annuler
           </button>
