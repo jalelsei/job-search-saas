@@ -5,7 +5,12 @@ import Link from "next/link"
 import { timeSinceLabel } from "@/lib/utils"
 
 export default async function DashboardPage() {
-  const session = await auth()
+  let session
+  try {
+    session = await auth()
+  } catch {
+    redirect("/login")
+  }
 
   if (!session?.user?.id) {
     redirect("/login")
@@ -52,7 +57,7 @@ export default async function DashboardPage() {
     <div className="px-4 py-6 sm:px-0">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">
-          Bienvenue, {session.user.name || session.user.email}
+          Bienvenue, {session?.user?.name ?? session?.user?.email ?? "Utilisateur"}
         </h1>
         <p className="mt-2 text-gray-600">
           Voici un aperçu de votre recherche d'emploi
