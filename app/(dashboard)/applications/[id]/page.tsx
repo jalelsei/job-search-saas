@@ -30,7 +30,16 @@ export default function ApplicationDetailPage() {
   const [paypersData, setPaypersData] = useState<{
     company: { name: string; website?: string; industry?: string; size?: string }
     contacts: { name: string; email?: string; phone?: string; position?: string }[]
-    paypers?: { siret?: string; address?: string; manager?: string; [key: string]: unknown }
+    paypers?: {
+      source?: string
+      siret?: string; siren?: string; address?: string; manager?: string
+      managers?: { nom?: string; fonction?: string }[]
+      effectif?: string; effectifMin?: number; effectifMax?: number
+      chiffreAffaires?: string; resultat?: string
+      formeJuridique?: string; dateCreation?: string; capital?: string
+      message?: string
+      [key: string]: unknown
+    }
   } | null>(null)
   const [paypersLoading, setPaypersLoading] = useState(false)
 
@@ -190,26 +199,26 @@ export default function ApplicationDetailPage() {
   }
 
   return (
-    <div className="px-4 py-6 sm:px-0 max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
+    <div className="min-h-screen sm:min-h-0 px-3 py-4 sm:px-0 sm:py-6 max-w-4xl mx-auto">
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-4 sm:mb-6">
         <Link
           href="/applications"
-          className="text-blue-600 hover:text-blue-500"
+          className="text-blue-600 hover:text-blue-500 text-sm sm:text-base touch-manipulation"
         >
           ← Retour
         </Link>
-        <div className="space-x-2">
+        <div className="flex flex-wrap gap-2">
           {!editing && (
             <>
               <button
                 onClick={() => setEditing(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="min-h-[44px] px-4 py-2.5 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium touch-manipulation"
               >
                 Modifier
               </button>
               <button
                 onClick={handleDelete}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                className="min-h-[44px] px-4 py-2.5 sm:py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium touch-manipulation"
               >
                 Supprimer
               </button>
@@ -219,8 +228,8 @@ export default function ApplicationDetailPage() {
       </div>
 
       {editing ? (
-        <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 space-y-6">
-          <h1 className="text-3xl font-bold text-gray-900">Modifier la candidature</h1>
+        <form onSubmit={handleSubmit} className="bg-white shadow rounded-xl p-4 sm:p-6 space-y-5 sm:space-y-6">
+          <h1 className="text-xl sm:text-3xl font-bold text-gray-900">Modifier la candidature</h1>
 
           <div>
             <label htmlFor="position" className="block text-sm font-medium text-gray-700">
@@ -402,71 +411,82 @@ export default function ApplicationDetailPage() {
             />
           </div>
 
-          <div className="flex justify-end space-x-4">
+          <div className="flex flex-wrap gap-3 justify-end">
             <button
               type="button"
               onClick={() => {
                 setEditing(false)
                 fetchApplication()
               }}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              className="min-h-[44px] px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 touch-manipulation"
             >
               Annuler
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="min-h-[44px] px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 touch-manipulation"
             >
               {submitting ? "Enregistrement..." : "Enregistrer"}
             </button>
           </div>
         </form>
       ) : (
-        <div className="bg-white shadow rounded-lg p-6 space-y-6">
-          <h1 className="text-3xl font-bold text-gray-900">
-            {application.position}
-          </h1>
+        <div className="bg-white shadow rounded-xl p-4 sm:p-6 space-y-5 sm:space-y-6">
+          {/* Poste + Entreprise / Cabinet bien visibles */}
+          <div className="space-y-2">
+            <h1 className="text-xl sm:text-3xl font-bold text-gray-900 leading-tight">
+              {application.position}
+            </h1>
+            <div className="flex flex-wrap items-baseline gap-2">
+              <span className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wide">Entreprise / Cabinet</span>
+              <p className="text-lg sm:text-xl font-semibold text-gray-900">
+                {application.company.name}
+              </p>
+            </div>
+          </div>
 
+          {/* Compteur temps écoulé — bien visible */}
           {timeSince && (
-            <div className="flex items-center gap-2 rounded-lg bg-slate-100 px-4 py-2 text-sm text-gray-700">
-              <span className="font-medium">Écoulé depuis la candidature :</span>
-              <span>{timeSince}</span>
+            <div className="flex flex-wrap items-center gap-2 rounded-xl bg-slate-100 border border-slate-200 px-4 py-3 sm:py-3.5">
+              <span className="text-sm sm:text-base font-semibold text-gray-700">Temps écoulé :</span>
+              <span className="text-base sm:text-lg font-bold text-gray-900">{timeSince}</span>
             </div>
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <h2 className="text-sm font-medium text-gray-500">Entreprise</h2>
-              <p className="text-lg text-gray-900">{application.company.name}</p>
-            </div>
-            <div>
               <h2 className="text-sm font-medium text-gray-500">Statut</h2>
               <p className="text-lg text-gray-900">{statusMap[application.status]}</p>
             </div>
-            {(application.platform ?? application.announcementLink) && (
-              <>
-                {application.platform && (
-                  <div>
-                    <h2 className="text-sm font-medium text-gray-500">Plateforme</h2>
-                    <p className="text-lg text-gray-900">{application.platform}</p>
-                  </div>
-                )}
-                {application.announcementLink && (
-                  <div className="sm:col-span-2">
-                    <h2 className="text-sm font-medium text-gray-500">Lien de l'annonce</h2>
-                    <a
-                      href={application.announcementLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline break-all"
-                    >
-                      {application.announcementLink}
-                    </a>
-                  </div>
-                )}
-              </>
+            {application.platform && (
+              <div>
+                <h2 className="text-sm font-medium text-gray-500">Plateforme</h2>
+                <p className="text-lg text-gray-900">{application.platform}</p>
+              </div>
             )}
+          </div>
+
+          {/* Lien annonce — grand et facile à cliquer (mobile + desktop) */}
+          {application.announcementLink && (
+            <div className="w-full">
+              <h2 className="text-sm font-medium text-gray-500 mb-2">Lien de l'annonce</h2>
+              <a
+                href={application.announcementLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full min-h-[48px] sm:min-h-[52px] px-4 py-3 rounded-xl bg-blue-50 border-2 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 text-base sm:text-lg font-medium break-all text-center touch-manipulation active:scale-[0.98] transition"
+              >
+                <span className="flex-1 min-w-0 truncate sm:break-all">Ouvrir l'annonce</span>
+                <span className="shrink-0" aria-hidden>→</span>
+              </a>
+              <p className="mt-1.5 text-xs text-gray-400 truncate max-w-full" title={application.announcementLink}>
+                {application.announcementLink}
+              </p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {application.publisherType && (
               <div>
                 <h2 className="text-sm font-medium text-gray-500">Type de société</h2>
@@ -519,31 +539,64 @@ export default function ApplicationDetailPage() {
             )}
           </div>
 
-          <div>
+          <div className="mt-4">
             <button
               type="button"
               onClick={fetchPaypers}
               disabled={paypersLoading}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 text-sm font-medium"
+              className="w-full sm:w-auto min-h-[48px] sm:min-h-[44px] px-5 py-3 sm:py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 text-base sm:text-sm font-medium touch-manipulation"
             >
-              {paypersLoading ? "Chargement..." : "Infos entreprise (API PayPers)"}
+              {paypersLoading ? "Chargement..." : "Recherche API entreprise"}
             </button>
             {paypersData && (
-              <div className="mt-4 p-4 rounded-lg border border-gray-200 bg-gray-50 space-y-3">
-                <h3 className="font-medium text-gray-900">Données entreprise / PayPers</h3>
+              <div className="mt-4 p-4 sm:p-5 rounded-xl border border-gray-200 bg-gray-50 space-y-3 text-sm sm:text-base">
+                <h3 className="font-semibold text-gray-900">Données entreprise</h3>
                 <p><span className="text-gray-500">Nom :</span> {paypersData.company.name}</p>
                 {paypersData.company.website && <p><span className="text-gray-500">Site :</span> {paypersData.company.website}</p>}
                 {paypersData.company.industry && <p><span className="text-gray-500">Secteur :</span> {paypersData.company.industry}</p>}
                 {paypersData.company.size && <p><span className="text-gray-500">Taille :</span> {paypersData.company.size}</p>}
-                {paypersData.paypers?.address != null && <p><span className="text-gray-500">Adresse :</span> {String(paypersData.paypers.address)}</p>}
-                {paypersData.paypers?.manager != null && <p><span className="text-gray-500">Dirigeant :</span> {String(paypersData.paypers.manager)}</p>}
-                {paypersData.paypers?.siret != null && <p><span className="text-gray-500">SIRET :</span> {String(paypersData.paypers.siret)}</p>}
+                {paypersData.paypers?.source === "pappers" && (
+                  <>
+                    {paypersData.paypers?.address && <p><span className="text-gray-500">Adresse :</span> {String(paypersData.paypers.address)}</p>}
+                    {paypersData.paypers?.siret && <p><span className="text-gray-500">SIRET :</span> {String(paypersData.paypers.siret)}</p>}
+                    {paypersData.paypers?.siren && <p><span className="text-gray-500">SIREN :</span> {String(paypersData.paypers.siren)}</p>}
+                    {paypersData.paypers?.formeJuridique && <p><span className="text-gray-500">Forme juridique :</span> {String(paypersData.paypers.formeJuridique)}</p>}
+                    {(paypersData.paypers?.effectif ?? paypersData.paypers?.effectifMin ?? paypersData.paypers?.effectifMax) != null && (
+                      <p><span className="text-gray-500">Effectif :</span>{" "}
+                        {paypersData.paypers.effectif ?? (paypersData.paypers.effectifMin != null && paypersData.paypers.effectifMax != null
+                          ? `${paypersData.paypers.effectifMin} - ${paypersData.paypers.effectifMax}`
+                          : paypersData.paypers.effectifMin ?? paypersData.paypers.effectifMax)}
+                      </p>
+                    )}
+                    {paypersData.paypers?.chiffreAffaires && <p><span className="text-gray-500">Chiffre d'affaires :</span> {String(paypersData.paypers.chiffreAffaires)}</p>}
+                    {paypersData.paypers?.resultat != null && <p><span className="text-gray-500">Résultat :</span> {String(paypersData.paypers.resultat)}</p>}
+                    {paypersData.paypers?.dateCreation && <p><span className="text-gray-500">Création :</span> {String(paypersData.paypers.dateCreation)}</p>}
+                    {paypersData.paypers?.capital != null && <p><span className="text-gray-500">Capital :</span> {String(paypersData.paypers.capital)}</p>}
+                    {(paypersData.paypers?.manager ?? (paypersData.paypers?.managers && paypersData.paypers.managers.length > 0)) && (
+                      <div>
+                        <p className="text-gray-500 mb-1">Dirigeant(s)</p>
+                        {paypersData.paypers.manager ? (
+                          <p className="text-gray-900">{paypersData.paypers.manager}</p>
+                        ) : (
+                          <ul className="list-disc list-inside text-gray-900">
+                            {paypersData.paypers.managers!.map((m, i) => (
+                              <li key={i}>{m.nom ?? ""} {m.fonction ? `— ${m.fonction}` : ""}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+                {paypersData.paypers?.source === "none" && paypersData.paypers?.message && (
+                  <p className="text-amber-700">{paypersData.paypers.message}</p>
+                )}
                 {paypersData.contacts?.length > 0 && (
                   <div>
-                    <p className="text-gray-500 mb-1">Contacts</p>
+                    <p className="text-gray-500 mb-1">Vos contacts</p>
                     <ul className="list-disc list-inside text-gray-900">
                       {paypersData.contacts.map((c, i) => (
-                        <li key={i}>{c.name} {c.position && `(${c.position})`} {c.email && `— ${c.email}`}</li>
+                        <li key={i}>{c.name} {c.position ? `(${c.position})` : ""} {c.email ? `— ${c.email}` : ""}</li>
                       ))}
                     </ul>
                   </div>
