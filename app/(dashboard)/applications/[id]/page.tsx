@@ -198,33 +198,41 @@ export default function ApplicationDetailPage() {
     return <div className="p-6">Candidature non trouvée</div>
   }
 
+  const statusStyles: Record<string, string> = {
+    TO_APPLY: "from-amber-400 to-amber-600 text-white shadow-amber-200",
+    APPLIED: "from-blue-500 to-indigo-600 text-white shadow-blue-200",
+    INTERVIEW: "from-emerald-500 to-teal-600 text-white shadow-emerald-200",
+    REJECTED: "from-rose-500 to-red-600 text-white shadow-rose-200",
+    ACCEPTED: "from-violet-500 to-purple-600 text-white shadow-violet-200",
+  }
+  const statusStyle = statusStyles[application?.status] ?? statusStyles.APPLIED
+
   return (
     <div className="min-h-screen sm:min-h-0 px-3 py-4 sm:px-0 sm:py-6 max-w-4xl mx-auto">
+      {/* Barre d'actions */}
       <div className="flex flex-wrap justify-between items-center gap-3 mb-4 sm:mb-6">
         <Link
           href="/applications"
-          className="text-blue-600 hover:text-blue-500 text-sm sm:text-base touch-manipulation"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition touch-manipulation"
         >
-          ← Retour
+          <span className="text-slate-400">←</span> Retour
         </Link>
-        <div className="flex flex-wrap gap-2">
-          {!editing && (
-            <>
-              <button
-                onClick={() => setEditing(true)}
-                className="min-h-[44px] px-4 py-2.5 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium touch-manipulation"
-              >
-                Modifier
-              </button>
-              <button
-                onClick={handleDelete}
-                className="min-h-[44px] px-4 py-2.5 sm:py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium touch-manipulation"
-              >
-                Supprimer
-              </button>
-            </>
-          )}
-        </div>
+        {!editing && (
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setEditing(true)}
+              className="min-h-[44px] px-4 py-2.5 rounded-xl bg-gradient-to-r from-slate-700 to-slate-800 text-white text-sm font-medium shadow-lg hover:shadow-xl hover:from-slate-600 hover:to-slate-700 transition-all touch-manipulation"
+            >
+              Modifier
+            </button>
+            <button
+              onClick={handleDelete}
+              className="min-h-[44px] px-4 py-2.5 rounded-xl bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 text-sm font-medium transition touch-manipulation"
+            >
+              Supprimer
+            </button>
+          </div>
+        )}
       </div>
 
       {editing ? (
@@ -432,125 +440,121 @@ export default function ApplicationDetailPage() {
           </div>
         </form>
       ) : (
-        <div className="bg-white shadow rounded-xl p-4 sm:p-6 space-y-5 sm:space-y-6">
-          {/* Poste + Entreprise / Cabinet bien visibles */}
-          <div className="space-y-2">
-            <h1 className="text-xl sm:text-3xl font-bold text-gray-900 leading-tight">
-              {application.position}
-            </h1>
-            <div className="flex flex-wrap items-baseline gap-2">
-              <span className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wide">Entreprise / Cabinet</span>
-              <p className="text-lg sm:text-xl font-semibold text-gray-900">
+        <div className="overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-black/5">
+          {/* Hero header avec dégradé */}
+          <div className="relative bg-gradient-to-br from-slate-800 via-indigo-900 to-slate-800 px-6 py-8 sm:px-8 sm:py-10">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(99,102,241,0.25),transparent)]" />
+            <div className="relative">
+              <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r ${statusStyle} shadow-lg`}>
+                {statusMap[application.status]}
+              </span>
+              <h1 className="mt-4 text-xl sm:text-3xl font-bold text-white leading-tight tracking-tight">
+                {application.position}
+              </h1>
+              <p className="mt-2 text-indigo-200 text-base sm:text-lg font-medium">
                 {application.company.name}
               </p>
+              {timeSince && (
+                <div className="mt-4 inline-flex items-center gap-2 rounded-lg bg-white/10 backdrop-blur px-4 py-2">
+                  <span className="text-indigo-200 text-sm font-medium">Temps écoulé</span>
+                  <span className="text-white font-bold">{timeSince}</span>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Compteur temps écoulé — bien visible */}
-          {timeSince && (
-            <div className="flex flex-wrap items-center gap-2 rounded-xl bg-slate-100 border border-slate-200 px-4 py-3 sm:py-3.5">
-              <span className="text-sm sm:text-base font-semibold text-gray-700">Temps écoulé :</span>
-              <span className="text-base sm:text-lg font-bold text-gray-900">{timeSince}</span>
+          <div className="p-6 sm:p-8 space-y-6">
+            {/* Ligne Statut + Plateforme */}
+            <div className="flex flex-wrap gap-4">
+              {application.platform && (
+                <div className="rounded-xl bg-gradient-to-br from-slate-50 to-slate-100/80 px-4 py-3 border border-slate-200/60">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Plateforme</p>
+                  <p className="text-slate-900 font-semibold mt-0.5">{application.platform}</p>
+                </div>
+              )}
             </div>
-          )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <h2 className="text-sm font-medium text-gray-500">Statut</h2>
-              <p className="text-lg text-gray-900">{statusMap[application.status]}</p>
-            </div>
-            {application.platform && (
-              <div>
-                <h2 className="text-sm font-medium text-gray-500">Plateforme</h2>
-                <p className="text-lg text-gray-900">{application.platform}</p>
-              </div>
-            )}
-          </div>
-
-          {/* Lien annonce — grand et facile à cliquer (mobile + desktop) */}
-          {application.announcementLink && (
-            <div className="w-full">
-              <h2 className="text-sm font-medium text-gray-500 mb-2">Lien de l'annonce</h2>
-              <a
-                href={application.announcementLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full min-h-[48px] sm:min-h-[52px] px-4 py-3 rounded-xl bg-blue-50 border-2 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 text-base sm:text-lg font-medium break-all text-center touch-manipulation active:scale-[0.98] transition"
-              >
-                <span className="flex-1 min-w-0 truncate sm:break-all">Ouvrir l'annonce</span>
-                <span className="shrink-0" aria-hidden>→</span>
-              </a>
-              <p className="mt-1.5 text-xs text-gray-400 truncate max-w-full" title={application.announcementLink}>
-                {application.announcementLink}
-              </p>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {application.publisherType && (
-              <div>
-                <h2 className="text-sm font-medium text-gray-500">Type de société</h2>
-                <p className="text-lg text-gray-900">
-                  {application.publisherType === "CABINET" ? "Cabinet (recrutement)" : "Entreprise"}
+            {/* Lien annonce — CTA visuel */}
+            {application.announcementLink && (
+              <div className="rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 p-[2px] shadow-lg shadow-blue-500/20">
+                <a
+                  href={application.announcementLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full min-h-[52px] px-4 py-3 rounded-[14px] bg-white text-blue-600 hover:bg-blue-50 text-base sm:text-lg font-semibold transition active:scale-[0.99]"
+                >
+                  <span className="flex-1 min-w-0 truncate sm:break-all text-center">Ouvrir l&apos;annonce</span>
+                  <span className="shrink-0 text-blue-400" aria-hidden>→</span>
+                </a>
+                <p className="mt-2 text-xs text-slate-400 truncate max-w-full" title={application.announcementLink}>
+                  {application.announcementLink}
                 </p>
               </div>
             )}
-            {application.productType && (
-              <div>
-                <h2 className="text-sm font-medium text-gray-500">Type de produit / secteur</h2>
-                <p className="text-lg text-gray-900">{application.productType}</p>
-              </div>
-            )}
-            {application.salary && (
-              <div>
-                <h2 className="text-sm font-medium text-gray-500">Salaire</h2>
-                <p className="text-lg text-gray-900">{application.salary}</p>
-              </div>
-            )}
+
+            {/* Grille Infos clés */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {application.publisherType && (
+                <div className="rounded-xl bg-slate-50/80 border border-slate-200/60 p-4 hover:border-slate-300/60 transition">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Type de société</p>
+                  <p className="text-slate-900 font-medium mt-1">
+                    {application.publisherType === "CABINET" ? "Cabinet (recrutement)" : "Entreprise"}
+                  </p>
+                </div>
+              )}
+              {application.productType && (
+                <div className="rounded-xl bg-slate-50/80 border border-slate-200/60 p-4 hover:border-slate-300/60 transition">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Secteur / Produit</p>
+                  <p className="text-slate-900 font-medium mt-1">{application.productType}</p>
+                </div>
+              )}
+              {application.salary && (
+                <div className="rounded-xl bg-gradient-to-br from-amber-50 to-orange-50/80 border border-amber-200/60 p-4">
+                  <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider">Salaire</p>
+                  <p className="text-slate-900 font-semibold mt-1">{application.salary}</p>
+                </div>
+              )}
+              {application.deadline && (
+                <div className="rounded-xl bg-slate-50/80 border border-slate-200/60 p-4">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Deadline</p>
+                  <p className="text-slate-900 font-medium mt-1">{new Date(application.deadline).toLocaleDateString("fr-FR")}</p>
+                </div>
+              )}
+              {application.appliedAt && (
+                <div className="rounded-xl bg-slate-50/80 border border-slate-200/60 p-4">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Date d&apos;envoi</p>
+                  <p className="text-slate-900 font-medium mt-1">{new Date(application.appliedAt).toLocaleDateString("fr-FR")}</p>
+                </div>
+              )}
+              {application.interviewAt && (
+                <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50/80 border border-emerald-200/60 p-4">
+                  <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wider">Entretien</p>
+                  <p className="text-slate-900 font-medium mt-1">{new Date(application.interviewAt).toLocaleString("fr-FR")}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Avantages — bloc dédié */}
             {application.benefits && (
-              <div className="sm:col-span-2">
-                <h2 className="text-sm font-medium text-gray-500">Avantages</h2>
-                <p className="text-lg text-gray-900 whitespace-pre-wrap">{application.benefits}</p>
+              <div className="rounded-2xl bg-gradient-to-br from-violet-50/80 to-indigo-50/60 border border-violet-200/50 p-5 sm:p-6">
+                <h3 className="text-sm font-bold text-violet-800 uppercase tracking-wider mb-3">Avantages</h3>
+                <p className="text-slate-800 whitespace-pre-wrap leading-relaxed">{application.benefits}</p>
               </div>
             )}
-            {application.deadline && (
-              <div>
-                <h2 className="text-sm font-medium text-gray-500">Deadline</h2>
-                <p className="text-lg text-gray-900">
-                  {new Date(application.deadline).toLocaleDateString("fr-FR")}
-                </p>
-              </div>
-            )}
-            {application.appliedAt && (
-              <div>
-                <h2 className="text-sm font-medium text-gray-500">Date d'envoi</h2>
-                <p className="text-lg text-gray-900">
-                  {new Date(application.appliedAt).toLocaleDateString("fr-FR")}
-                </p>
-              </div>
-            )}
-            {application.interviewAt && (
-              <div>
-                <h2 className="text-sm font-medium text-gray-500">Date d'entretien</h2>
-                <p className="text-lg text-gray-900">
-                  {new Date(application.interviewAt).toLocaleString("fr-FR")}
-                </p>
-              </div>
-            )}
-          </div>
 
-          <div className="mt-4">
-            <button
-              type="button"
-              onClick={fetchPaypers}
-              disabled={paypersLoading}
-              className="w-full sm:w-auto min-h-[48px] sm:min-h-[44px] px-5 py-3 sm:py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 text-base sm:text-sm font-medium touch-manipulation"
-            >
-              {paypersLoading ? "Chargement..." : "Recherche API entreprise"}
-            </button>
-            {paypersData && (
-              <div className="mt-4 p-4 sm:p-5 rounded-xl border border-gray-200 bg-gray-50 space-y-3 text-sm sm:text-base">
-                <h3 className="font-semibold text-gray-900">Données entreprise</h3>
+            {/* API entreprise */}
+            <div className="rounded-2xl border border-slate-200/60 bg-gradient-to-br from-slate-50 to-white p-5 sm:p-6">
+              <button
+                type="button"
+                onClick={fetchPaypers}
+                disabled={paypersLoading}
+                className="min-h-[48px] px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-medium shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 disabled:opacity-50 transition-all touch-manipulation"
+              >
+                {paypersLoading ? "Chargement..." : "Recherche API entreprise"}
+              </button>
+              {paypersData && (
+                <div className="mt-4 p-4 sm:p-5 rounded-xl bg-white/80 border border-slate-200/60 space-y-3 text-sm sm:text-base">
+                  <h3 className="font-semibold text-slate-900">Données entreprise</h3>
                 <p><span className="text-gray-500">Nom :</span> {paypersData.company.name}</p>
                 {paypersData.company.website && <p><span className="text-gray-500">Site :</span> {paypersData.company.website}</p>}
                 {paypersData.company.industry && <p><span className="text-gray-500">Secteur :</span> {paypersData.company.industry}</p>}
@@ -601,16 +605,18 @@ export default function ApplicationDetailPage() {
                     </ul>
                   </div>
                 )}
+                </div>
+              )}
+            </div>
+
+            {/* Notes */}
+            {application.notes && (
+              <div className="rounded-2xl bg-slate-50/80 border border-slate-200/60 p-5 sm:p-6">
+                <h3 className="text-sm font-bold text-slate-600 uppercase tracking-wider mb-2">Notes</h3>
+                <p className="text-slate-800 whitespace-pre-wrap leading-relaxed">{application.notes}</p>
               </div>
             )}
           </div>
-
-          {application.notes && (
-            <div>
-              <h2 className="text-sm font-medium text-gray-500">Notes</h2>
-              <p className="text-lg text-gray-900 whitespace-pre-wrap">{application.notes}</p>
-            </div>
-          )}
         </div>
       )}
     </div>
