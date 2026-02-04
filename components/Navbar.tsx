@@ -11,6 +11,7 @@ export default function Navbar() {
     { href: "/dashboard", label: "Dashboard" },
     { href: "/applications", label: "Candidatures" },
     { href: "/companies", label: "Entreprises" },
+    { href: "/contacts", label: "Contacts" },
     { href: "/documents", label: "Documents" },
     { href: "/calendar", label: "Calendrier" },
     { href: "/analytics", label: "Analytics" },

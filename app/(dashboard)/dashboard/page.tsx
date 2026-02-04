@@ -191,11 +191,15 @@ export default async function DashboardPage() {
                         {app.position}
                       </h3>
                       <p className="text-sm text-gray-500">{app.company?.name ?? "—"}</p>
+                      {app.salary && (
+                        <p className="mt-1 text-sm font-medium text-emerald-700">
+                          Salaire : {String(app.salary)}
+                        </p>
+                      )}
                       <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-gray-500">
                         {timeSince && <span>{timeSince}</span>}
                         {app.platform && <span>• {String(app.platform)}</span>}
                         {app.productType && <span>• {String(app.productType)}</span>}
-                        {app.salary && <span>• {String(app.salary)}</span>}
                         {app.announcementLink && (
                           <a
                             href={String(app.announcementLink)}
