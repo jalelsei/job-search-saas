@@ -18,27 +18,45 @@ export default async function DashboardPage() {
 
   const userId = session.user.id
 
-  // Récupérer les statistiques
-  const [
-    totalApplications,
-    applicationsByStatus,
-    recentApplications,
-    totalCompanies,
-  ] = await Promise.all([
-    prisma.application.count({ where: { userId } }),
-    prisma.application.groupBy({
-      by: ["status"],
-      where: { userId },
-      _count: true,
-    }),
-    prisma.application.findMany({
-      where: { userId },
-      take: 5,
-      orderBy: { createdAt: "desc" },
-      include: { company: true },
-    }),
-    prisma.company.count({ where: { userId } }),
-  ])
+  let totalApplications: number
+  let applicationsByStatus: { status: string; _count: number }[]
+  let recentApplications: { id: string; position: string; status: string; company: { name: string }; appliedAt: Date | null; createdAt: Date; [key: string]: unknown }[]
+  let totalCompanies: number
+
+  try {
+    const [countApps, byStatus, recent, countCompanies] = await Promise.all([
+      prisma.application.count({ where: { userId } }),
+      prisma.application.groupBy({
+        by: ["status"],
+        where: { userId },
+        _count: true,
+      }),
+      prisma.application.findMany({
+        where: { userId },
+        take: 5,
+        orderBy: { createdAt: "desc" },
+        include: { company: true },
+      }),
+      prisma.company.count({ where: { userId } }),
+    ])
+    totalApplications = countApps
+    applicationsByStatus = byStatus
+    recentApplications = recent
+    totalCompanies = countCompanies
+  } catch (err) {
+    console.error("Dashboard Prisma error:", err)
+    return (
+      <div className="px-4 py-6">
+        <h1 className="text-xl font-semibold text-gray-900 mb-2">Impossible de charger le tableau de bord</h1>
+        <p className="text-gray-600 mb-4">
+          Vérifiez la connexion à la base de données (variable NETLIFY_DATABASE_URL ou DATABASE_URL sur Netlify).
+        </p>
+        <Link href="/login" className="text-blue-600 hover:underline">
+          Retour à la connexion
+        </Link>
+      </div>
+    )
+  }
 
   const statusMap: Record<string, string> = {
     TO_APPLY: "À postuler",
