@@ -75,7 +75,7 @@ export default async function DashboardPage() {
     <div className="px-4 py-6 sm:px-0">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">
-          Bienvenue, {session?.user?.name ?? session?.user?.email ?? "Utilisateur"}
+          Bienvenue, {String(session?.user?.name ?? session?.user?.email ?? "Utilisateur")}
         </h1>
         <p className="mt-2 text-gray-600">
           Voici un aperçu de votre recherche d'emploi
@@ -175,7 +175,12 @@ export default async function DashboardPage() {
             <div className="space-y-4">
               {recentApplications.map((app) => {
                 const refDate = app.appliedAt ?? app.createdAt
-                const timeSince = timeSinceLabel(refDate)
+                let timeSince: string | null = null
+                try {
+                  timeSince = timeSinceLabel(refDate)
+                } catch {
+                  timeSince = null
+                }
                 return (
                   <div
                     key={app.id}
@@ -185,19 +190,18 @@ export default async function DashboardPage() {
                       <h3 className="text-sm font-medium text-gray-900">
                         {app.position}
                       </h3>
-                      <p className="text-sm text-gray-500">{app.company.name}</p>
+                      <p className="text-sm text-gray-500">{app.company?.name ?? "—"}</p>
                       <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-gray-500">
                         {timeSince && <span>{timeSince}</span>}
-                        {app.platform && <span>• {app.platform}</span>}
-                        {app.productType && <span>• {app.productType}</span>}
-                        {app.salary && <span>• {app.salary}</span>}
+                        {app.platform && <span>• {String(app.platform)}</span>}
+                        {app.productType && <span>• {String(app.productType)}</span>}
+                        {app.salary && <span>• {String(app.salary)}</span>}
                         {app.announcementLink && (
                           <a
-                            href={app.announcementLink}
+                            href={String(app.announcementLink)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:underline"
-                            onClick={(e) => e.stopPropagation()}
                           >
                             Lien annonce
                           </a>
@@ -206,7 +210,7 @@ export default async function DashboardPage() {
                     </div>
                     <div className="flex items-center space-x-4 shrink-0 ml-4">
                       <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                        {statusMap[app.status]}
+                        {statusMap[app.status] ?? String(app.status)}
                       </span>
                       <Link
                         href={`/applications/${app.id}`}
