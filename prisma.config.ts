@@ -8,7 +8,11 @@ export default defineConfig({
   migrations: {
     path: "prisma/migrations",
   },
+  // Migrations need unpooled URL (Neon) to avoid advisory lock timeout; runtime uses pooled in lib/prisma.ts
   datasource: {
-    url: process.env["DATABASE_URL"] ?? process.env["NETLIFY_DATABASE_URL"],
+    url:
+      process.env["DATABASE_URL"] ??
+      process.env["NETLIFY_DATABASE_URL_UNPOOLED"] ??
+      process.env["NETLIFY_DATABASE_URL"],
   },
 });
