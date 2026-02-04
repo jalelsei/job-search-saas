@@ -57,7 +57,21 @@ export async function PUT(
 
     const { id } = await params
     const body = await request.json()
-    const { position, status, companyId, appliedAt, interviewAt, deadline, notes } = body
+    const {
+      position,
+      status,
+      companyId,
+      appliedAt,
+      interviewAt,
+      deadline,
+      notes,
+      announcementLink,
+      productType,
+      salary,
+      benefits,
+      publisherType,
+      platform,
+    } = body
 
     // Vérifier que la candidature appartient à l'utilisateur
     const existing = await prisma.application.findFirst({
@@ -77,13 +91,19 @@ export async function PUT(
     const application = await prisma.application.update({
       where: { id },
       data: {
-        position: position || undefined,
-        status: status || undefined,
-        companyId: companyId || undefined,
+        position: position ?? undefined,
+        status: status ?? undefined,
+        companyId: companyId ?? undefined,
         appliedAt: appliedAt ? new Date(appliedAt) : appliedAt === null ? null : undefined,
         interviewAt: interviewAt ? new Date(interviewAt) : interviewAt === null ? null : undefined,
         deadline: deadline ? new Date(deadline) : deadline === null ? null : undefined,
         notes: notes !== undefined ? notes : undefined,
+        announcementLink: announcementLink !== undefined ? announcementLink : undefined,
+        productType: productType !== undefined ? productType : undefined,
+        salary: salary !== undefined ? salary : undefined,
+        benefits: benefits !== undefined ? benefits : undefined,
+        publisherType: publisherType !== undefined ? publisherType : undefined,
+        platform: platform !== undefined ? platform : undefined,
       },
       include: {
         company: true,

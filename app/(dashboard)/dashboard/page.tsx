@@ -2,6 +2,7 @@ import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import Link from "next/link"
+import { timeSinceLabel } from "@/lib/utils"
 
 export default async function DashboardPage() {
   const session = await auth()
@@ -149,30 +150,51 @@ export default async function DashboardPage() {
             </p>
           ) : (
             <div className="space-y-4">
-              {recentApplications.map((app) => (
-                <div
-                  key={app.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
-                >
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-900">
-                      {app.position}
-                    </h3>
-                    <p className="text-sm text-gray-500">{app.company.name}</p>
+              {recentApplications.map((app) => {
+                const refDate = app.appliedAt ?? app.createdAt
+                const timeSince = timeSinceLabel(refDate)
+                return (
+                  <div
+                    key={app.id}
+                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-sm font-medium text-gray-900">
+                        {app.position}
+                      </h3>
+                      <p className="text-sm text-gray-500">{app.company.name}</p>
+                      <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-gray-500">
+                        {timeSince && <span>{timeSince}</span>}
+                        {app.platform && <span>• {app.platform}</span>}
+                        {app.productType && <span>• {app.productType}</span>}
+                        {app.salary && <span>• {app.salary}</span>}
+                        {app.announcementLink && (
+                          <a
+                            href={app.announcementLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Lien annonce
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-4 shrink-0 ml-4">
+                      <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                        {statusMap[app.status]}
+                      </span>
+                      <Link
+                        href={`/applications/${app.id}`}
+                        className="text-sm text-blue-600 hover:text-blue-500"
+                      >
+                        Voir
+                      </Link>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-4">
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                      {statusMap[app.status]}
-                    </span>
-                    <Link
-                      href={`/applications/${app.id}`}
-                      className="text-sm text-blue-600 hover:text-blue-500"
-                    >
-                      Voir
-                    </Link>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>

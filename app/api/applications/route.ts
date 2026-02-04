@@ -36,7 +36,21 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { position, status, companyId, appliedAt, interviewAt, deadline, notes } = body
+    const {
+      position,
+      status,
+      companyId,
+      appliedAt,
+      interviewAt,
+      deadline,
+      notes,
+      announcementLink,
+      productType,
+      salary,
+      benefits,
+      publisherType,
+      platform,
+    } = body
 
     if (!position || !companyId) {
       return NextResponse.json(
@@ -55,6 +69,12 @@ export async function POST(request: Request) {
         interviewAt: interviewAt ? new Date(interviewAt) : null,
         deadline: deadline ? new Date(deadline) : null,
         notes: notes || null,
+        announcementLink: announcementLink || null,
+        productType: productType || null,
+        salary: salary || null,
+        benefits: benefits || null,
+        publisherType: publisherType || null,
+        platform: platform || null,
       },
       include: {
         company: true,

@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { Application } from "@prisma/client"
 import { Company } from "@prisma/client"
+import { timeSinceLabel } from "@/lib/utils"
 
 interface ApplicationCardProps {
   application: Application & { company: Company }
@@ -18,6 +19,8 @@ const statusMap: Record<string, { label: string; color: string }> = {
 
 export default function ApplicationCard({ application }: ApplicationCardProps) {
   const status = statusMap[application.status] || statusMap.TO_APPLY
+  const refDate = application.appliedAt ?? application.createdAt
+  const timeSince = timeSinceLabel(refDate)
 
   return (
     <Link
@@ -30,14 +33,29 @@ export default function ApplicationCard({ application }: ApplicationCardProps) {
             {application.position}
           </h3>
           <p className="text-sm text-gray-600 mt-1">{application.company.name}</p>
-          {application.deadline && (
-            <p className="text-xs text-gray-500 mt-2">
-              Deadline: {new Date(application.deadline).toLocaleDateString("fr-FR")}
-            </p>
+          <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-xs text-gray-500">
+            {timeSince && <span>{timeSince}</span>}
+            {application.platform && <span>• {application.platform}</span>}
+            {application.productType && <span>• {application.productType}</span>}
+            {application.salary && <span>• {application.salary}</span>}
+            {application.deadline && (
+              <span>Deadline: {new Date(application.deadline).toLocaleDateString("fr-FR")}</span>
+            )}
+          </div>
+          {application.announcementLink && (
+            <a
+              href={application.announcementLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="text-xs text-blue-600 hover:underline mt-1 inline-block truncate max-w-full"
+            >
+              Lien annonce
+            </a>
           )}
         </div>
         <span
-          className={`px-3 py-1 text-xs font-medium rounded-full ${status.color}`}
+          className={`px-3 py-1 text-xs font-medium rounded-full shrink-0 ${status.color}`}
         >
           {status.label}
         </span>

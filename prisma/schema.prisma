@@ -22,20 +22,26 @@ model User {
 }
 
 model Application {
-  id            String    @id @default(cuid())
-  position      String
-  status        ApplicationStatus
-  appliedAt     DateTime?
-  interviewAt   DateTime?
-  deadline      DateTime?
-  notes         String?
-  userId        String
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  companyId     String
-  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  documents     Document[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                String            @id @default(cuid())
+  position          String
+  status            ApplicationStatus
+  appliedAt         DateTime?
+  interviewAt       DateTime?
+  deadline          DateTime?
+  notes             String?
+  announcementLink  String?           // Lien de l'annonce
+  productType       String?           // Type de produit que l'entreprise vend
+  salary            String?           // Salaire (ex: "40k-50k", "Non communiqué")
+  benefits          String?           // Avantages
+  publisherType     PublisherType?    // Cabinet ou Entreprise
+  platform          String?           // Plateforme (LinkedIn, Indeed, etc.)
+  userId            String
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId         String
+  company           Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  documents         Document[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 }
 
 model Company {
@@ -80,6 +86,11 @@ enum ApplicationStatus {
   INTERVIEW
   REJECTED
   ACCEPTED
+}
+
+enum PublisherType {
+  CABINET    // Cabinet de recrutement
+  ENTREPRISE // Entreprise
 }
 
 enum DocumentType {

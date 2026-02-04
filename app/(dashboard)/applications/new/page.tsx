@@ -16,6 +16,12 @@ export default function NewApplicationPage() {
     interviewAt: "",
     deadline: "",
     notes: "",
+    announcementLink: "",
+    productType: "",
+    salary: "",
+    benefits: "",
+    publisherType: "" as "" | "CABINET" | "ENTREPRISE",
+    platform: "",
   })
 
   useEffect(() => {
@@ -41,12 +47,21 @@ export default function NewApplicationPage() {
     setSubmitting(true)
 
     try {
+      const payload = {
+        ...formData,
+        announcementLink: formData.announcementLink || undefined,
+        productType: formData.productType || undefined,
+        salary: formData.salary || undefined,
+        benefits: formData.benefits || undefined,
+        publisherType: formData.publisherType || undefined,
+        platform: formData.platform || undefined,
+      }
       const response = await fetch("/api/applications", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       })
 
       if (response.ok) {
@@ -170,6 +185,92 @@ export default function NewApplicationPage() {
               className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
+        </div>
+
+        <div>
+          <label htmlFor="announcementLink" className="block text-sm font-medium text-gray-700">
+            Lien de l'annonce
+          </label>
+          <input
+            type="url"
+            id="announcementLink"
+            placeholder="https://..."
+            value={formData.announcementLink}
+            onChange={(e) => setFormData({ ...formData, announcementLink: e.target.value })}
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="platform" className="block text-sm font-medium text-gray-700">
+            Plateforme (LinkedIn, Indeed, etc.)
+          </label>
+          <input
+            type="text"
+            id="platform"
+            placeholder="LinkedIn, Indeed, Welcome to the Jungle..."
+            value={formData.platform}
+            onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="publisherType" className="block text-sm font-medium text-gray-700">
+            Type de société qui publie l'annonce
+          </label>
+          <select
+            id="publisherType"
+            value={formData.publisherType}
+            onChange={(e) => setFormData({ ...formData, publisherType: e.target.value as "" | "CABINET" | "ENTREPRISE" })}
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          >
+            <option value="">— Choisir —</option>
+            <option value="CABINET">Cabinet (recrutement)</option>
+            <option value="ENTREPRISE">Entreprise</option>
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="productType" className="block text-sm font-medium text-gray-700">
+            Type de produit / secteur (ce que l'entreprise vend)
+          </label>
+          <input
+            type="text"
+            id="productType"
+            placeholder="SaaS, assurance, retail..."
+            value={formData.productType}
+            onChange={(e) => setFormData({ ...formData, productType: e.target.value })}
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="salary" className="block text-sm font-medium text-gray-700">
+            Salaire
+          </label>
+          <input
+            type="text"
+            id="salary"
+            placeholder="40k-50k, Non communiqué..."
+            value={formData.salary}
+            onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="benefits" className="block text-sm font-medium text-gray-700">
+            Avantages
+          </label>
+          <textarea
+            id="benefits"
+            rows={2}
+            placeholder="Télétravail, mutuelle, CE..."
+            value={formData.benefits}
+            onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
         </div>
 
         <div>
