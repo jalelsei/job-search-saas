@@ -23,6 +23,21 @@ export default function CompanyDetailPage() {
     phone: "",
     position: "",
   })
+  const [paypersData, setPaypersData] = useState<{
+    company: { name: string; website?: string; industry?: string; size?: string }
+    contacts: { name: string; email?: string; phone?: string; position?: string }[]
+    paypers?: {
+      source?: string
+      siret?: string; siren?: string; address?: string; manager?: string
+      managers?: { nom?: string; fonction?: string }[]
+      effectif?: string; effectifMin?: number; effectifMax?: number
+      chiffreAffaires?: string; resultat?: string
+      formeJuridique?: string; dateCreation?: string; capital?: string
+      message?: string
+      [key: string]: unknown
+    }
+  } | null>(null)
+  const [paypersLoading, setPaypersLoading] = useState(false)
 
   useEffect(() => {
     fetchCompany()
@@ -45,6 +60,26 @@ export default function CompanyDetailPage() {
       console.error("Erreur:", error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchPaypers = async () => {
+    if (!params.id) return
+    setPaypersLoading(true)
+    setPaypersData(null)
+    try {
+      const response = await fetch(`/api/paypers?companyId=${params.id}`)
+      if (response.ok) {
+        const data = await response.json()
+        setPaypersData(data)
+      } else {
+        const err = await response.json()
+        alert(err.error || "Erreur API entreprise")
+      }
+    } catch (error) {
+      alert("Erreur lors de l'appel API entreprise")
+    } finally {
+      setPaypersLoading(false)
     }
   }
 
@@ -271,6 +306,72 @@ export default function CompanyDetailPage() {
                 <p className="text-lg text-gray-900">{company.size}</p>
               </div>
             )}
+
+            <div className="mt-6 pt-4 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={fetchPaypers}
+                disabled={paypersLoading}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 text-sm font-medium"
+              >
+                {paypersLoading ? "Chargement..." : "Recherche API entreprise (Pappers)"}
+              </button>
+              {paypersData && (
+                <div className="mt-4 p-4 rounded-xl border border-gray-200 bg-gray-50 space-y-3 text-sm">
+                  <h3 className="font-semibold text-gray-900">Données entreprise</h3>
+                  <p><span className="text-gray-500">Nom :</span> {paypersData.company.name}</p>
+                  {paypersData.company.website && <p><span className="text-gray-500">Site :</span> {paypersData.company.website}</p>}
+                  {paypersData.company.industry && <p><span className="text-gray-500">Secteur :</span> {paypersData.company.industry}</p>}
+                  {paypersData.company.size && <p><span className="text-gray-500">Taille :</span> {paypersData.company.size}</p>}
+                  {paypersData.paypers?.source === "pappers" && (
+                    <>
+                      {paypersData.paypers?.address && <p><span className="text-gray-500">Adresse :</span> {String(paypersData.paypers.address)}</p>}
+                      {paypersData.paypers?.siret && <p><span className="text-gray-500">SIRET :</span> {String(paypersData.paypers.siret)}</p>}
+                      {paypersData.paypers?.siren && <p><span className="text-gray-500">SIREN :</span> {String(paypersData.paypers.siren)}</p>}
+                      {paypersData.paypers?.formeJuridique && <p><span className="text-gray-500">Forme juridique :</span> {String(paypersData.paypers.formeJuridique)}</p>}
+                      {(paypersData.paypers?.effectif ?? paypersData.paypers?.effectifMin ?? paypersData.paypers?.effectifMax) != null && (
+                        <p><span className="text-gray-500">Effectif :</span>{" "}
+                          {paypersData.paypers.effectif ?? (paypersData.paypers.effectifMin != null && paypersData.paypers.effectifMax != null
+                            ? `${paypersData.paypers.effectifMin} - ${paypersData.paypers.effectifMax}`
+                            : paypersData.paypers.effectifMin ?? paypersData.paypers.effectifMax)}
+                        </p>
+                      )}
+                      {paypersData.paypers?.chiffreAffaires && <p><span className="text-gray-500">Chiffre d'affaires :</span> {String(paypersData.paypers.chiffreAffaires)}</p>}
+                      {paypersData.paypers?.resultat != null && <p><span className="text-gray-500">Résultat :</span> {String(paypersData.paypers.resultat)}</p>}
+                      {paypersData.paypers?.dateCreation && <p><span className="text-gray-500">Création :</span> {String(paypersData.paypers.dateCreation)}</p>}
+                      {paypersData.paypers?.capital != null && <p><span className="text-gray-500">Capital :</span> {String(paypersData.paypers.capital)}</p>}
+                      {(paypersData.paypers?.manager ?? (paypersData.paypers?.managers && paypersData.paypers.managers.length > 0)) && (
+                        <div>
+                          <p className="text-gray-500 mb-1">Dirigeant(s)</p>
+                          {paypersData.paypers.manager ? (
+                            <p className="text-gray-900">{paypersData.paypers.manager}</p>
+                          ) : (
+                            <ul className="list-disc list-inside text-gray-900">
+                              {paypersData.paypers.managers!.map((m: { nom?: string; fonction?: string }, i: number) => (
+                                <li key={i}>{m.nom ?? ""} {m.fonction ? `— ${m.fonction}` : ""}</li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
+                  {paypersData.paypers?.source === "none" && paypersData.paypers?.message && (
+                    <p className="text-amber-700">{paypersData.paypers.message}</p>
+                  )}
+                  {paypersData.contacts?.length > 0 && (
+                    <div>
+                      <p className="text-gray-500 mb-1">Vos contacts</p>
+                      <ul className="list-disc list-inside text-gray-900">
+                        {paypersData.contacts.map((c: { name: string; position?: string; email?: string }, i: number) => (
+                          <li key={i}>{c.name} {c.position ? `(${c.position})` : ""} {c.email ? `— ${c.email}` : ""}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
