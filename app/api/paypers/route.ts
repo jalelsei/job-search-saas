@@ -55,9 +55,9 @@ export async function GET(request: Request) {
       // Ex: const res = await fetch(`https://api.paypers.fr/...?siret=${siret}`, { headers: { Authorization: paypersApiKey } })
       // paypersData = await res.json()
       paypersData = {
-        siret: null,
-        address: null,
-        manager: null,
+        siret: undefined,
+        address: undefined,
+        manager: undefined,
         _message: "Configurez l'appel API PayPers dans api/paypers/route.ts",
       }
     }
