@@ -21,6 +21,8 @@ export default function ApplicationDetailPage() {
     deadline: "",
     notes: "",
     headhunterProposals: "",
+    cabinetCompanyId: "",
+    cabinetContactId: "",
     announcementLink: "",
     productType: "",
     salary: "",
@@ -28,6 +30,7 @@ export default function ApplicationDetailPage() {
     publisherType: "" as "" | "CABINET" | "ENTREPRISE",
     platform: "",
   })
+  const [cabinetContacts, setCabinetContacts] = useState<{ id: string; name: string; email: string | null; phone: string | null; position: string | null }[]>([])
   const [paypersData, setPaypersData] = useState<{
     company: { name: string; website?: string; industry?: string; size?: string }
     contacts: { name: string; email?: string; phone?: string; position?: string }[]
@@ -64,6 +67,8 @@ export default function ApplicationDetailPage() {
           deadline: data.deadline ? new Date(data.deadline).toISOString().split("T")[0] : "",
           notes: data.notes || "",
           headhunterProposals: data.headhunterProposals || "",
+          cabinetCompanyId: data.cabinetCompanyId || "",
+          cabinetContactId: data.cabinetContactId || "",
           announcementLink: data.announcementLink || "",
           productType: data.productType || "",
           salary: data.salary || "",
@@ -90,6 +95,22 @@ export default function ApplicationDetailPage() {
       console.error("Erreur:", error)
     }
   }
+
+  useEffect(() => {
+    if (!formData.cabinetCompanyId) {
+      setCabinetContacts([])
+      return
+    }
+    let cancelled = false
+    fetch(`/api/companies/${formData.cabinetCompanyId}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((company) => {
+        if (!cancelled && company?.contacts) setCabinetContacts(company.contacts)
+        else if (!cancelled) setCabinetContacts([])
+      })
+      .catch(() => { if (!cancelled) setCabinetContacts([]) })
+    return () => { cancelled = true }
+  }, [formData.cabinetCompanyId])
 
   const fetchPaypers = async () => {
     if (!application?.companyId) return
@@ -140,6 +161,8 @@ export default function ApplicationDetailPage() {
         salary: formData.salary || undefined,
         benefits: formData.benefits || undefined,
         headhunterProposals: formData.headhunterProposals || undefined,
+        cabinetCompanyId: formData.cabinetCompanyId || undefined,
+        cabinetContactId: formData.cabinetContactId || undefined,
         publisherType: formData.publisherType || undefined,
         platform: formData.platform || undefined,
       }
@@ -434,7 +457,38 @@ export default function ApplicationDetailPage() {
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
-
+          <div>
+            <label htmlFor="cabinetCompanyId" className="block text-sm font-medium text-gray-700">
+              Cabinet recruteur (chasseur de tête)
+            </label>
+            <select
+              id="cabinetCompanyId"
+              value={formData.cabinetCompanyId}
+              onChange={(e) => setFormData({ ...formData, cabinetCompanyId: e.target.value, cabinetContactId: "" })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            >
+              <option value="">— Aucun —</option>
+              {companies.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="cabinetContactId" className="block text-sm font-medium text-gray-700">
+              Contact au cabinet
+            </label>
+            <select
+              id="cabinetContactId"
+              value={formData.cabinetContactId}
+              onChange={(e) => setFormData({ ...formData, cabinetContactId: e.target.value })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            >
+              <option value="">— Aucun —</option>
+              {cabinetContacts.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}{c.position ? ` (${c.position})` : ""}</option>
+              ))}
+            </select>
+          </div>
           <div className="flex flex-wrap gap-3 justify-end">
             <button
               type="button"
@@ -489,6 +543,34 @@ export default function ApplicationDetailPage() {
                 </div>
               )}
             </div>
+
+            {/* Cabinet recruteur + contact */}
+            {(application.cabinetCompany || application.cabinetContact) && (
+              <div className="rounded-2xl bg-gradient-to-br from-amber-50/80 to-orange-50/60 border border-amber-200/60 p-4 sm:p-5">
+                <h3 className="text-sm font-bold text-amber-800 uppercase tracking-wider mb-3">Cabinet recruteur</h3>
+                <div className="flex flex-wrap gap-4">
+                  {application.cabinetCompany && (
+                    <p className="text-slate-900 font-medium">
+                      <Link href={`/companies/${application.cabinetCompany.id}`} className="text-blue-600 hover:underline">
+                        {application.cabinetCompany.name}
+                      </Link>
+                    </p>
+                  )}
+                  {application.cabinetContact && (
+                    <p className="text-slate-700 text-sm">
+                      Contact : {application.cabinetContact.name}
+                      {application.cabinetContact.position && ` (${application.cabinetContact.position})`}
+                      {application.cabinetContact.email && (
+                        <a href={`mailto:${application.cabinetContact.email}`} className="text-blue-600 hover:underline ml-1">{application.cabinetContact.email}</a>
+                      )}
+                      {application.cabinetContact.phone && (
+                        <a href={`tel:${application.cabinetContact.phone}`} className="text-blue-600 hover:underline ml-1">{application.cabinetContact.phone}</a>
+                      )}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Lien annonce — CTA visuel */}
             {application.announcementLink && (

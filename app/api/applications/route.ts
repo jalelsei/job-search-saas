@@ -13,6 +13,8 @@ export async function GET() {
       where: { userId: session.user.id },
       include: {
         company: true,
+        cabinetCompany: true,
+        cabinetContact: true,
         documents: true,
       },
       orderBy: { createdAt: "desc" },
@@ -45,6 +47,8 @@ export async function POST(request: Request) {
       deadline,
       notes,
       headhunterProposals,
+      cabinetCompanyId,
+      cabinetContactId,
       announcementLink,
       productType,
       salary,
@@ -71,6 +75,8 @@ export async function POST(request: Request) {
         deadline: deadline ? new Date(deadline) : null,
         notes: notes || null,
         headhunterProposals: headhunterProposals || null,
+        cabinetCompanyId: cabinetCompanyId || null,
+        cabinetContactId: cabinetContactId || null,
         announcementLink: announcementLink || null,
         productType: productType || null,
         salary: salary || null,
@@ -80,6 +86,8 @@ export async function POST(request: Request) {
       },
       include: {
         company: true,
+        cabinetCompany: true,
+        cabinetContact: true,
       },
     })
 

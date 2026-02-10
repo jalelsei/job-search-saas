@@ -12,6 +12,7 @@ export default function Navbar() {
   const navItems = [
     { href: "/dashboard", label: "Dashboard" },
     { href: "/applications", label: "Candidatures" },
+    { href: "/propositions-cabinet", label: "Propositions cabinet" },
     { href: "/companies", label: "Entreprises" },
     { href: "/contacts", label: "Contacts" },
     { href: "/documents", label: "Documents" },

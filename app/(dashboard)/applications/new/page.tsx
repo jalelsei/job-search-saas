@@ -17,6 +17,8 @@ export default function NewApplicationPage() {
     deadline: "",
     notes: "",
     headhunterProposals: "",
+    cabinetCompanyId: "",
+    cabinetContactId: "",
     announcementLink: "",
     productType: "",
     salary: "",
@@ -24,10 +26,27 @@ export default function NewApplicationPage() {
     publisherType: "" as "" | "CABINET" | "ENTREPRISE",
     platform: "",
   })
+  const [cabinetContacts, setCabinetContacts] = useState<{ id: string; name: string; email: string | null; phone: string | null; position: string | null }[]>([])
 
   useEffect(() => {
     fetchCompanies()
   }, [])
+
+  useEffect(() => {
+    if (!formData.cabinetCompanyId) {
+      setCabinetContacts([])
+      return
+    }
+    let cancelled = false
+    fetch(`/api/companies/${formData.cabinetCompanyId}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((company) => {
+        if (!cancelled && company?.contacts) setCabinetContacts(company.contacts)
+        else if (!cancelled) setCabinetContacts([])
+      })
+      .catch(() => { if (!cancelled) setCabinetContacts([]) })
+    return () => { cancelled = true }
+  }, [formData.cabinetCompanyId])
 
   const fetchCompanies = async () => {
     try {
@@ -50,6 +69,9 @@ export default function NewApplicationPage() {
     try {
       const payload = {
         ...formData,
+        headhunterProposals: formData.headhunterProposals || undefined,
+        cabinetCompanyId: formData.cabinetCompanyId || undefined,
+        cabinetContactId: formData.cabinetContactId || undefined,
         announcementLink: formData.announcementLink || undefined,
         productType: formData.productType || undefined,
         salary: formData.salary || undefined,
@@ -299,6 +321,39 @@ export default function NewApplicationPage() {
             onChange={(e) => setFormData({ ...formData, headhunterProposals: e.target.value })}
             className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           />
+        </div>
+
+        <div>
+          <label htmlFor="cabinetCompanyId" className="block text-sm font-medium text-gray-700">
+            Cabinet recruteur (chasseur de tête)
+          </label>
+          <select
+            id="cabinetCompanyId"
+            value={formData.cabinetCompanyId}
+            onChange={(e) => setFormData({ ...formData, cabinetCompanyId: e.target.value, cabinetContactId: "" })}
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          >
+            <option value="">— Aucun —</option>
+            {companies.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="cabinetContactId" className="block text-sm font-medium text-gray-700">
+            Contact au cabinet
+          </label>
+          <select
+            id="cabinetContactId"
+            value={formData.cabinetContactId}
+            onChange={(e) => setFormData({ ...formData, cabinetContactId: e.target.value })}
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          >
+            <option value="">— Aucun —</option>
+            {cabinetContacts.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}{c.position ? ` (${c.position})` : ""}</option>
+            ))}
+          </select>
         </div>
 
         <div className="flex justify-end space-x-4">

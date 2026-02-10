@@ -24,6 +24,8 @@ export async function GET(
             contacts: true,
           },
         },
+        cabinetCompany: true,
+        cabinetContact: true,
         documents: true,
       },
     })
@@ -66,6 +68,8 @@ export async function PUT(
       deadline,
       notes,
       headhunterProposals,
+      cabinetCompanyId,
+      cabinetContactId,
       announcementLink,
       productType,
       salary,
@@ -100,6 +104,8 @@ export async function PUT(
         deadline: deadline ? new Date(deadline) : deadline === null ? null : undefined,
         notes: notes !== undefined ? notes : undefined,
         headhunterProposals: headhunterProposals !== undefined ? headhunterProposals : undefined,
+        cabinetCompanyId: cabinetCompanyId !== undefined ? cabinetCompanyId || null : undefined,
+        cabinetContactId: cabinetContactId !== undefined ? cabinetContactId || null : undefined,
         announcementLink: announcementLink !== undefined ? announcementLink : undefined,
         productType: productType !== undefined ? productType : undefined,
         salary: salary !== undefined ? salary : undefined,
@@ -109,6 +115,8 @@ export async function PUT(
       },
       include: {
         company: true,
+        cabinetCompany: true,
+        cabinetContact: true,
         documents: true,
       },
     })

@@ -30,6 +30,8 @@ model Application {
   deadline          DateTime?
   notes             String?
   headhunterProposals String?         // Propositions reçues via des cabinets / chasseurs
+  cabinetCompanyId   String?           // Cabinet recruteur (chasseur de tête)
+  cabinetContactId   String?          // Contact au cabinet
   announcementLink  String?           // Lien de l'annonce
   productType       String?           // Type de produit que l'entreprise vend
   salary            String?           // Salaire (ex: "40k-50k", "Non communiqué")
@@ -40,33 +42,37 @@ model Application {
   user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   companyId         String
   company           Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  cabinetCompany    Company?          @relation("CabinetRecruteur", fields: [cabinetCompanyId], references: [id], onDelete: SetNull)
+  cabinetContact    Contact?          @relation(fields: [cabinetContactId], references: [id], onDelete: SetNull)
   documents         Document[]
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 }
 
 model Company {
-  id            String    @id @default(cuid())
-  name          String
-  website       String?
-  industry      String?
-  size          String?
-  userId        String
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  applications  Application[]
-  contacts      Contact[]
-  createdAt     DateTime  @default(now())
+  id               String        @id @default(cuid())
+  name             String
+  website          String?
+  industry         String?
+  size             String?
+  userId           String
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications     Application[]
+  cabinetProposals Application[]  @relation("CabinetRecruteur")
+  contacts         Contact[]
+  createdAt        DateTime      @default(now())
 }
 
 model Contact {
-  id            String    @id @default(cuid())
-  name          String
-  email         String?
-  phone         String?
-  position      String?
-  companyId     String
-  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  createdAt     DateTime  @default(now())
+  id               String        @id @default(cuid())
+  name             String
+  email            String?
+  phone            String?
+  position         String?
+  companyId        String
+  company          Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  cabinetProposals Application[]
+  createdAt        DateTime      @default(now())
 }
 
 model Document {
