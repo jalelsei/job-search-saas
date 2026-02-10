@@ -21,6 +21,10 @@ export default function ApplicationCard({ application }: ApplicationCardProps) {
   const status = statusMap[application.status] || statusMap.TO_APPLY
   const refDate = application.appliedAt ?? application.createdAt
   const timeSince = timeSinceLabel(refDate)
+  const isHeadhunter =
+    application.publisherType === "CABINET" ||
+    !!application.cabinetCompanyId ||
+    !!(application.headhunterProposals && application.headhunterProposals.trim().length > 0)
 
   return (
     <Link
@@ -54,11 +58,18 @@ export default function ApplicationCard({ application }: ApplicationCardProps) {
             </a>
           )}
         </div>
-        <span
-          className={`px-3 py-1 text-xs font-medium rounded-full shrink-0 ${status.color}`}
-        >
-          {status.label}
-        </span>
+        <div className="flex flex-col items-end gap-1.5 shrink-0">
+          {isHeadhunter && (
+            <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-800">
+              Chasseur de tête
+            </span>
+          )}
+          <span
+            className={`px-3 py-1 text-xs font-medium rounded-full ${status.color}`}
+          >
+            {status.label}
+          </span>
+        </div>
       </div>
       {application.notes && (
         <p className="text-sm text-gray-600 mt-3 line-clamp-2">
