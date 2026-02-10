@@ -21,10 +21,7 @@ export default function ApplicationCard({ application }: ApplicationCardProps) {
   const status = statusMap[application.status] || statusMap.TO_APPLY
   const refDate = application.appliedAt ?? application.createdAt
   const timeSince = timeSinceLabel(refDate)
-  const isHeadhunter =
-    application.publisherType === "CABINET" ||
-    !!application.cabinetCompanyId ||
-    !!(application.headhunterProposals && application.headhunterProposals.trim().length > 0)
+  const isHeadhunter = application.publisherType === "CABINET"
 
   return (
     <Link
