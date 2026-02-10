@@ -29,6 +29,7 @@ model Application {
   interviewAt       DateTime?
   deadline          DateTime?
   notes             String?
+  headhunterProposals String?         // Propositions reçues via des cabinets / chasseurs
   announcementLink  String?           // Lien de l'annonce
   productType       String?           // Type de produit que l'entreprise vend
   salary            String?           // Salaire (ex: "40k-50k", "Non communiqué")

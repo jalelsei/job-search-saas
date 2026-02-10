@@ -16,6 +16,7 @@ export default function NewApplicationPage() {
     interviewAt: "",
     deadline: "",
     notes: "",
+    headhunterProposals: "",
     announcementLink: "",
     productType: "",
     salary: "",
@@ -282,6 +283,20 @@ export default function NewApplicationPage() {
             rows={4}
             value={formData.notes}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="headhunterProposals" className="block text-sm font-medium text-gray-700">
+            Propositions cabinet (offres de chasse)
+          </label>
+          <textarea
+            id="headhunterProposals"
+            rows={3}
+            placeholder="Offres proposées par les cabinets / chasseurs de tête"
+            value={formData.headhunterProposals}
+            onChange={(e) => setFormData({ ...formData, headhunterProposals: e.target.value })}
             className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           />
         </div>

@@ -20,6 +20,7 @@ export default function ApplicationDetailPage() {
     interviewAt: "",
     deadline: "",
     notes: "",
+    headhunterProposals: "",
     announcementLink: "",
     productType: "",
     salary: "",
@@ -62,6 +63,7 @@ export default function ApplicationDetailPage() {
           interviewAt: data.interviewAt ? new Date(data.interviewAt).toISOString().slice(0, 16) : "",
           deadline: data.deadline ? new Date(data.deadline).toISOString().split("T")[0] : "",
           notes: data.notes || "",
+          headhunterProposals: data.headhunterProposals || "",
           announcementLink: data.announcementLink || "",
           productType: data.productType || "",
           salary: data.salary || "",
@@ -137,6 +139,7 @@ export default function ApplicationDetailPage() {
         productType: formData.productType || undefined,
         salary: formData.salary || undefined,
         benefits: formData.benefits || undefined,
+        headhunterProposals: formData.headhunterProposals || undefined,
         publisherType: formData.publisherType || undefined,
         platform: formData.platform || undefined,
       }
@@ -419,6 +422,19 @@ export default function ApplicationDetailPage() {
             />
           </div>
 
+          <div>
+            <label htmlFor="headhunterProposals" className="block text-sm font-medium text-gray-700">
+              Propositions cabinet (offres de chasse)
+            </label>
+            <textarea
+              id="headhunterProposals"
+              rows={3}
+              value={formData.headhunterProposals}
+              onChange={(e) => setFormData({ ...formData, headhunterProposals: e.target.value })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+
           <div className="flex flex-wrap gap-3 justify-end">
             <button
               type="button"
@@ -609,11 +625,25 @@ export default function ApplicationDetailPage() {
               )}
             </div>
 
-            {/* Notes */}
-            {application.notes && (
-              <div className="rounded-2xl bg-slate-50/80 border border-slate-200/60 p-5 sm:p-6">
-                <h3 className="text-sm font-bold text-slate-600 uppercase tracking-wider mb-2">Notes</h3>
-                <p className="text-slate-800 whitespace-pre-wrap leading-relaxed">{application.notes}</p>
+            {/* Notes & propositions cabinet */}
+            {(application.notes || application.headhunterProposals) && (
+              <div className="grid gap-6 lg:grid-cols-2">
+                {application.notes && (
+                  <div className="rounded-2xl bg-slate-50/80 border border-slate-200/60 p-5 sm:p-6">
+                    <h3 className="text-sm font-bold text-slate-600 uppercase tracking-wider mb-2">Notes</h3>
+                    <p className="text-slate-800 whitespace-pre-wrap leading-relaxed">{application.notes}</p>
+                  </div>
+                )}
+                {application.headhunterProposals && (
+                  <div className="rounded-2xl bg-gradient-to-br from-amber-50/80 to-orange-50/70 border border-amber-200/70 p-5 sm:p-6">
+                    <h3 className="text-sm font-bold text-amber-800 uppercase tracking-wider mb-2">
+                      Propositions cabinet
+                    </h3>
+                    <p className="text-slate-800 whitespace-pre-wrap leading-relaxed">
+                      {application.headhunterProposals}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>
