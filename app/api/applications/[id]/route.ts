@@ -110,7 +110,7 @@ export async function PUT(
         productType: productType !== undefined ? productType : undefined,
         salary: salary !== undefined ? salary : undefined,
         benefits: benefits !== undefined ? benefits : undefined,
-        publisherType: publisherType !== undefined ? publisherType : undefined,
+        publisherType: publisherType !== undefined ? (publisherType || null) : undefined,
         platform: platform !== undefined ? platform : undefined,
       },
       include: {

@@ -163,7 +163,7 @@ export default function ApplicationDetailPage() {
         headhunterProposals: formData.headhunterProposals || undefined,
         cabinetCompanyId: formData.cabinetCompanyId || undefined,
         cabinetContactId: formData.cabinetContactId || undefined,
-        publisherType: formData.publisherType || undefined,
+        publisherType: formData.publisherType === "CABINET" ? "CABINET" : null,
         platform: formData.platform || undefined,
       }
       const response = await fetch(`/api/applications/${params.id}`, {
